@@ -23,3 +23,12 @@ GET | /api/users/:email | gets a user by specified email
 POST | /api/users/:email | updates user info
 DELETE | /api/users/:email | deletes a user by email
 POST | /api/password/change | change password for currently logged in user
+
+# To Dos
+
+- [x] Structure
+- [x] User management
+- [x] Authentication
+- [ ] Password management
+- [ ] Application management
+- [ ] Role management
