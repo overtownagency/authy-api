@@ -27,3 +27,8 @@ exports.decode_signature = function (signature, callback) {
         }
     });
 }
+
+exports.createTemporaryToken = function () {
+    const uuidv4 = require('uuid/v4');
+    return uuidv4();
+}

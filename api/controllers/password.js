@@ -17,8 +17,8 @@ exports.change_password = function (req, res) {
         return res.send({ success: false, formatErrors: errors });
     }
 
-    if(req.body.password.toLowerCase() === req.body.newPassword.toLowerCase()) {
-        return res.send({success: false, error: "New password cannot be the same as old password"})
+    if (req.body.password.toLowerCase() === req.body.newPassword.toLowerCase()) {
+        return res.send({ success: false, error: "New password cannot be the same as old password" })
     }
 
     if (req.body.email && decodedToken.email && req.body.email.toLowerCase() !== decodedToken.email.toLowerCase()) {
@@ -58,7 +58,7 @@ exports.change_password = function (req, res) {
                             return res.send({ success: false, error: "Error changing password" });
                         }
 
-                        return res.send({ success : true });
+                        return res.send({ success: true });
                     });
                 });
             }
@@ -67,27 +67,41 @@ exports.change_password = function (req, res) {
 }
 
 
-// exports.forgot_password = function(req, res) {
-// 	var emails = require('../notifications/email');
-// 	var authModel = require('../data/models/password');
+exports.forgot_password = async function (req, res) {
+    var users = new require('../data/models/user')();
+    let errors = []
 
-// 	token = jwt.sign(req.query.email, 'SECRET_KEY_GOES_HERE');
+    if (!req.body.email) {
+        errors.push("Email is required");
+    }
 
-// 	authModel.forgot_password(req.query.email, token, function(success, error) {
-// 		if(error) {
-//       return res.send({ success : false, error : error});
-//     }
+    if (errors.length > 0) {
+        return res.send({ success: false, formatErrors: errors });
+    }
 
-// 	  if(success) {
-// 		  emails.sendRecoveryEmail(req.query.email, token);
-// 			return res.send({ success : true });
-// 	  }
-// 	  else {
-// 			return res.send({ success : false, error :  "Forgot password failed"});
-// 	  }
-// 	});
+    const recoveryToken = require('../modules/token').createTemporaryToken();
 
-// }
+    let updates = { recoveryToken: recoveryToken }
+    users.updateUser(req.body.email, updates, function (err, user) {
+        if (err) {
+            console.log(err);
+            return res.send({ success: false, error: "Error updating user" });
+        }
+
+        const url = process.env.CHIRP_HOST + "/api/email/recovery";
+        const body = { emailTo: req.body.email, token: recoveryToken }
+
+        request.post({ url: url, json: true, body: body }, function (err, res) {
+            if (err) {
+                console.log(err);
+                return res.send({ success: false, error: "Error processing email service" });
+            }
+            else {
+                return res.send({ success: true });
+            }
+        });
+    });
+}
 
 // exports.change_password_with_token = function(req, res) {
 // 	var authModel = require('../data/models/password');
@@ -105,4 +119,3 @@ exports.change_password = function (req, res) {
 // 	  }
 // 	});
 // }
-

@@ -19,6 +19,7 @@ var userSchema = mongoose.Schema({
     lastPasswordChange : { type : Date },
     passwordExpiry : { type : Boolean },
     passwordExpiryDate : { type : Date },
+    recoveryToken : { type: String }
 });
 
 userSchema.methods.create = (firstName, lastName, email, password, passwordExpiry, callback) => {
